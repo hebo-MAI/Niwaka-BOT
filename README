@@ -1,0 +1,36 @@
+Niwaka-BOT
+
+[これって何？]
+  Twitterに自動投稿を行うことが出来るBOT。
+
+[必要なもの]
+  Javaが入っていればたぶん動きます。
+
+[導入]
+  compile.shとniwaka.sh、niwaka.javaを同じディレクトリに置きます。
+  次に、compile.shを実行します。
+
+[使い方]
+  niwaka.shに適当な引数をつけて実行すればBOTが動きます。
+  コマンドライン以外での実行は保証しません。
+  また、Windows版のバッチファイルは作成していませんので、必要な方は適宜作成して下さい。
+  
+  引数一覧
+  fav number --- numberに指定されたIDのツイートをお気に入りに登録します。
+  rt number --- numberに指定されたIDのツイートをリツイートします。
+  retweet number --- 同上。
+  tw number --- numberに指定された番号に対応する文字列をつぶやきます。tweet.txtがなければ動きません。
+  tweet number --- 同上。
+  say string --- stringの文字列をツイートとしてつぶやきます。
+  fav rt number --- number に指定されたIDのツイートをお気に入りに登録し、リツイートします。
+  rt fav number --- 同上。
+  start --- 自動でTwitterに投稿を行うモードとして実行します。バックグラウンドで実行すると効果的。
+  reply --- BOT宛てのツイートに対し、返信を行います。
+  reply number --- numberに指定されたIDのツイートに返信を行います。
+  response --- タイムラインに反応し、ツイートを行うことがあります。
+
+[作者]
+  http://twitter.com/hebo_MAI
+  要望・不満・改善等があれば連絡して下さい。
+  ただし、それに対して何らかの行動を起こすとは限りません。
+
