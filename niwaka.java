@@ -587,32 +587,28 @@ public class niwaka {
 		Pattern p;
 		Matcher m;
 
-		p = Pattern.compile("@"+BOT_NAME+" 「",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@"+BOT_NAME+" ?「.+」$",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
-			p = Pattern.compile("」$",Pattern.CASE_INSENSITIVE);
+			p = Pattern.compile("@"+BOT_NAME+" ",Pattern.CASE_INSENSITIVE);
 			m = p.matcher(str);
-			if (m.find()){
-				p = Pattern.compile("@"+BOT_NAME+" ",Pattern.CASE_INSENSITIVE);
-				m = p.matcher(str);
-				int count = resister_tweet(m.replaceAll(""));
-				if (count > 0) {
-					reply_str = name + " 登録しました。 (" + count + ")";
-				} else {
-					reply_str = name + " 登録に失敗しました。";
-				}
-				StatusUpdate su = new StatusUpdate(reply_str);
-				su.setInReplyToStatusId(id);
-				try {
-					twitter.updateStatus(su);
-				} catch (Exception e){
-					print_time();
-					e.printStackTrace();
-				}
-				return 100;
+			int count = resister_tweet(m.replaceAll(""));
+			if (count > 0) {
+				reply_str = name + " 登録しました。 (" + count + ")";
+			} else {
+				reply_str = name + " 登録に失敗しました。";
 			}
+			StatusUpdate su = new StatusUpdate(reply_str);
+			su.setInReplyToStatusId(id);
+			try {
+				twitter.updateStatus(su);
+			} catch (Exception e){
+				print_time();
+				e.printStackTrace();
+			}
+			return 100;
 		}
-		p = Pattern.compile("@"+BOT_NAME+" 登録( |　)|@"+BOT_NAME+" 登録して( |　)",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@"+BOT_NAME+" ?登録( |　)|@"+BOT_NAME+" ?登録して( |　)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
 			int count = resister_tweet(m.replaceAll(""));
@@ -635,8 +631,8 @@ public class niwaka {
 		p = Pattern.compile("^.+@"+BOT_NAME+"|^@"+BOT_NAME+"$|^@"+BOT_NAME+".$",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			if (Math.random()<0.5)	reply_str = name + "呼んだ？";
-			else					reply_str = name + "ねえ、呼んだ？";
+			if (Math.random()<0.5)	reply_str = name + " 呼んだ？";
+			else					reply_str = name + " ねえ、呼んだ？";
 			StatusUpdate su = new StatusUpdate(reply_str);
 			su.setInReplyToStatusId(id);
 			try {
@@ -647,10 +643,10 @@ public class niwaka {
 			}
 			return 10;
 		}
-		p = Pattern.compile("^@"+BOT_NAME+" 呼んでない",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("^@"+BOT_NAME+" ?呼んでない",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			reply_str = name + "あ、そう。";
+			reply_str = name + " あ、そう。";
 			StatusUpdate su = new StatusUpdate(reply_str);
 			su.setInReplyToStatusId(id);
 			try {
@@ -661,7 +657,7 @@ public class niwaka {
 			}
 			return 11;
 		}
-		p = Pattern.compile("^@"+BOT_NAME+" 気のせい",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("^@"+BOT_NAME+" ?気のせい",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			reply_str = name + "気のせいか・・・";
