@@ -738,7 +738,7 @@ public class niwaka {
 			}
 			return 101;
 		}
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?[ 　]|",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?[ 　]",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
 			int count = resister_tweet(m.replaceAll(""));
