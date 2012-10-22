@@ -22,6 +22,7 @@ public class Resister {
 	private static final File RESPONSE_FILE = new File("resister.txt");
 	private static final File TWEET_FILE = TwitterAction.TWEET_FILE;
 	private static final String LINE_SEPARATOR = TwitterAction.LINE_SEPARATOR;
+	private static final String NG_Word = "pino|ぴの";
 
 	/**
 	 * ツイートの候補のリストに入力文字列を登録する
@@ -30,11 +31,13 @@ public class Resister {
 	 * @throws : ResisterException 登録失敗の例外
 	 */
 	public static int resister_tweet(String str) throws ResisterException {
+		Log.addLog("Resistering the message : " + str);
 		Pattern p;
 		Matcher m;
-		p = Pattern.compile("pino|ぴの",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile(NG_Word, Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
+			Log.addLog("Containing wrong word. Couldn't resister the message.");
 			throw new ResisterException("Containing wrong word");
 		}
 
@@ -48,11 +51,11 @@ public class Resister {
 		try {
 			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(TWEET_FILE,true),"UTF-8"));
 			bw.write(LINE_SEPARATOR + str);
-			//bw.write(str);
 			bw.close();
 		} catch (IOException e) {
 			util.print_time();
 			e.printStackTrace();
+			Log.addLog("Couldn't resister message because of IOException.");
 			throw new ResisterException("IOException");
 		} finally {
 			try {
@@ -62,6 +65,7 @@ public class Resister {
 			} catch (IOException e) {
 				util.print_time();
 				e.printStackTrace();
+				Log.addLog("Couldn't resister message because of IOException.");
 				throw new ResisterException("IOException");
 			}
 		}
@@ -77,6 +81,7 @@ public class Resister {
 			e.printStackTrace();
 		}
 
+		Log.addLog("Succeeded to resister the message.");
 		return util.count_line(TWEET_FILE);
 	}
 
@@ -92,10 +97,11 @@ public class Resister {
 	public static int resister_response(String str1,String str2) throws ResisterException {
 		Pattern p;
 		Matcher m1,m2;
-		p = Pattern.compile("pino|ぴの",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile(NG_Word, Pattern.CASE_INSENSITIVE);
 		m1 = p.matcher(str1);
 		m2 = p.matcher(str2);
 		if (m1.find() || m2.find())  {
+			Log.addLog("Containing wrong word. Couldn't resister the message.");
 			throw new ResisterException("Containing wrong word");
 		}
 
@@ -106,16 +112,19 @@ public class Resister {
 		m2 = p.matcher(str2);
 		if (m2.find()) m2.replaceAll("\n");
 
+		Log.addLog("Resistering the response : " + str1);
+		Log.addLog("Resistering the message : " + str2);
+		
 		//反応をリストに登録する
 		BufferedWriter bw = null;
 		try {
 			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(TWEET_FILE,true),"UTF-8"));
 			bw.write(LINE_SEPARATOR + str1 + LINE_SEPARATOR + str2);
-			//bw.write(str);
 			bw.close();
 		} catch (IOException e) {
 			util.print_time();
 			e.printStackTrace();
+			Log.addLog("Couldn't resister message because of IOException.");
 			throw new ResisterException("IOException");
 		} finally {
 			try {
@@ -125,10 +134,12 @@ public class Resister {
 			} catch (IOException e) {
 				util.print_time();
 				e.printStackTrace();
+				Log.addLog("Cannot resister message because of IOException.");
 				throw new ResisterException("IOException");
 			}
 		}
 
+		Log.addLog("Succeeded to resister the message.");
 		return util.count_line(RESPONSE_FILE)/2;
 	}
 

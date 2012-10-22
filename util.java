@@ -21,6 +21,11 @@ public class util {
 	 * 呼び出したときの時間をエラー出力に表示する
 	 */
 	public static void print_time() {
+		System.err.print(get_time());
+
+	}
+
+	public static String get_time() {
 		Calendar c = Calendar.getInstance();
 
 		int month = c.get(Calendar.MONTH) + 1;
@@ -29,13 +34,12 @@ public class util {
 		int minute = c.get(Calendar.MINUTE);
 		int second = c.get(Calendar.SECOND);
 
-		System.err.print("[" + month + "/" + day + " " + hour + ":" + minute + ":" + second + "] ");
-
+		return "[" + month + "/" + day + " " + hour + ":" + minute + ":" + second + "] ";
 	}
 
 
-	/** http://www7a.biglobe.ne.jp/~java-master/samples/string/HankakuNumberToZenkakuNumber.html
-	 * 全角数字を半角に変換します。
+	/** 全角数字を半角に変換します。
+	 * http://www7a.biglobe.ne.jp/~java-master/samples/string/HankakuNumberToZenkakuNumber.html
 	 * @param s 変換元文字列
 	 * @return 変換後文字列
 	 */

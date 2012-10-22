@@ -14,12 +14,14 @@ import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 
 public class TwitterResponse extends TwitterAction {
+	static String target_name = "[(ぴの)|(pino)|(ｐｉｎｏ)|(ピノ)][(くん)君]";
 
 	public long responseTimeline() {
 		ResponseList<Status> userTimeline = null;
@@ -54,9 +56,7 @@ public class TwitterResponse extends TwitterAction {
 		Paging paging = new Paging (lastReadId);
 
 		try {
-			//userTimeline = twitter.getFriendsTimeline(paging);	//使用すべきではない
 			userTimeline = twitter.getHomeTimeline(paging);
-			//userTimeline = twitter.getHomeTimeline();
 		} catch (Exception e) {
 			util.print_time();
 			e.printStackTrace();
@@ -112,7 +112,7 @@ public class TwitterResponse extends TwitterAction {
 		Pattern p;
 		Matcher m;
 
-		// @niwaka_bot を含むツイートを除外する
+		// 自身の名前を含むツイートを除外する
 		p = Pattern.compile("@"+BOT_NAME, Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find())	return 1;
@@ -134,15 +134,7 @@ public class TwitterResponse extends TwitterAction {
 			StatusUpdate su = new StatusUpdate(reply);
 			su.setInReplyToStatusId(id);
 			try {
-				ConfigurationBuilder builder = new ConfigurationBuilder();
-				builder.setOAuthConsumerKey(CONSUMER_KEY);
-				builder.setOAuthConsumerSecret(CONSUMER_SECRET);
-				builder.setOAuthAccessToken(ACCESS_TOKEN);
-				builder.setOAuthAccessTokenSecret(ACCESS_SECRET);
-				Configuration conf = builder.build();
-
-				Twitter twitter = new TwitterFactory(conf).getInstance();
-				twitter.updateStatus(su);
+				tweet(su);
 				Thread.sleep(5000);
 			} catch (Exception e){
 				util.print_time();
@@ -160,15 +152,7 @@ public class TwitterResponse extends TwitterAction {
 			StatusUpdate su = new StatusUpdate(reply);
 			su.setInReplyToStatusId(id);
 			try {
-				ConfigurationBuilder builder = new ConfigurationBuilder();
-				builder.setOAuthConsumerKey(CONSUMER_KEY);
-				builder.setOAuthConsumerSecret(CONSUMER_SECRET);
-				builder.setOAuthAccessToken(ACCESS_TOKEN);
-				builder.setOAuthAccessTokenSecret(ACCESS_SECRET);
-				Configuration conf = builder.build();
-
-				Twitter twitter = new TwitterFactory(conf).getInstance();
-				twitter.updateStatus(su);
+				tweet(su);
 				Thread.sleep(5000);
 			} catch (Exception e){
 				util.print_time();
@@ -177,7 +161,7 @@ public class TwitterResponse extends TwitterAction {
 			return 15;
 		}
 
-		p = Pattern.compile("[(ぴの)|(pino)|(ｐｉｎｏ)|(ピノ)][(くん)君].*にわか",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile(target_name + ".*にわか",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			long id = status.getId();
@@ -187,15 +171,7 @@ public class TwitterResponse extends TwitterAction {
 			StatusUpdate su = new StatusUpdate(reply);
 			su.setInReplyToStatusId(id);
 			try {
-				ConfigurationBuilder builder = new ConfigurationBuilder();
-				builder.setOAuthConsumerKey(CONSUMER_KEY);
-				builder.setOAuthConsumerSecret(CONSUMER_SECRET);
-				builder.setOAuthAccessToken(ACCESS_TOKEN);
-				builder.setOAuthAccessTokenSecret(ACCESS_SECRET);
-				Configuration conf = builder.build();
-
-				Twitter twitter = new TwitterFactory(conf).getInstance();
-				twitter.updateStatus(su);
+				tweet(su);
 				Thread.sleep(5000);
 			} catch (Exception e){
 				util.print_time();
@@ -203,7 +179,7 @@ public class TwitterResponse extends TwitterAction {
 			}
 			return 13;
 		}
-		p = Pattern.compile("にわか.*[(ぴの)|(pino)|(ｐｉｎｏ)|(ピノ)][(くん)君]",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("にわか.*" + target_name ,Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			long id = status.getId();
@@ -213,15 +189,7 @@ public class TwitterResponse extends TwitterAction {
 			StatusUpdate su = new StatusUpdate(reply);
 			su.setInReplyToStatusId(id);
 			try {
-				ConfigurationBuilder builder = new ConfigurationBuilder();
-				builder.setOAuthConsumerKey(CONSUMER_KEY);
-				builder.setOAuthConsumerSecret(CONSUMER_SECRET);
-				builder.setOAuthAccessToken(ACCESS_TOKEN);
-				builder.setOAuthAccessTokenSecret(ACCESS_SECRET);
-				Configuration conf = builder.build();
-
-				Twitter twitter = new TwitterFactory(conf).getInstance();
-				twitter.updateStatus(su);
+				tweet(su);
 				Thread.sleep(5000);
 			} catch (Exception e){
 				util.print_time();
@@ -337,7 +305,6 @@ public class TwitterResponse extends TwitterAction {
 		Twitter twitter = new TwitterFactory(conf).getInstance();
 		String str = mention.getText();
 		long id = mention.getId();
-		//String name = "@" + mention.getInReplyToScreenName();
 		String name = "@" + mention.getUser().getScreenName();
 		//自分自身にはリプライしない
 		if (name.equals("@"+BOT_NAME)) return 100;
@@ -345,10 +312,10 @@ public class TwitterResponse extends TwitterAction {
 		Pattern p;
 		Matcher m;
 
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?「.+」$",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@"+BOT_NAME+"[ 　]?(「.+」$|登録(して)?([ 　]?「)?)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
-			p = Pattern.compile("@"+BOT_NAME+" ",Pattern.CASE_INSENSITIVE);
+			p = Pattern.compile("@"+BOT_NAME+"[ 　]?(登録(して)?)?[ 　]?",Pattern.CASE_INSENSITIVE);
 			m = p.matcher(str);
 			int count = -1;
 			try {
@@ -368,50 +335,6 @@ public class TwitterResponse extends TwitterAction {
 				e.printStackTrace();
 			}
 			return 100;
-		}
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?[ 　]?「",Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()){
-			int count = -1;
-			try {
-				count = Resister.resister_tweet(m.replaceAll("「"));
-				reply_str = name + " 登録しました。 (" + count + ")";
-			} catch (ResisterException e1) {
-				// TODO 自動生成された catch ブロック
-				e1.printStackTrace();
-				reply_str = name + " 登録に失敗しました。(error 1)";
-			}
-			StatusUpdate su = new StatusUpdate(reply_str);
-			su.setInReplyToStatusId(id);
-			try {
-				twitter.updateStatus(su);
-			} catch (Exception e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return 101;
-		}
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?[ 　]",Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()){
-			int count = -1;
-			try {
-				count = Resister.resister_tweet(m.replaceAll(""));
-				reply_str = name + " 登録しました。 (" + count + ")";
-			} catch (ResisterException e1) {
-				// TODO 自動生成された catch ブロック
-				e1.printStackTrace();
-				reply_str = name + " 登録に失敗しました。(error 2)";
-			}
-			StatusUpdate su = new StatusUpdate(reply_str);
-			su.setInReplyToStatusId(id);
-			try {
-				twitter.updateStatus(su);
-			} catch (Exception e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return 102;
 		}
 
 		p = Pattern.compile("^.+@"+BOT_NAME+"|^@"+BOT_NAME+".?$",Pattern.CASE_INSENSITIVE);
@@ -521,8 +444,16 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("(\\d+).?fav.rt",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
-			ta.fav(Long.parseLong(m.group(1)));
-			ta.rt(Long.parseLong(m.group(1)));
+			try {
+				ta.fav(Long.parseLong(m.group(1)));
+				ta.rt(Long.parseLong(m.group(1)));
+			} catch (NumberFormatException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			} catch (TwitterException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
 			reply_str = "@" + CREATOR + " " + m.group(1).concat("をfav&rtしました。");
 			StatusUpdate su = new StatusUpdate(reply_str);
 			su.setInReplyToStatusId(id);
@@ -538,8 +469,16 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("(\\d+).?rt.fav",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
-			ta.rt(Long.parseLong(m.group(1)));
-			ta.fav(Long.parseLong(m.group(1)));
+			try {
+				ta.rt(Long.parseLong(m.group(1)));
+				ta.fav(Long.parseLong(m.group(1)));
+			} catch (NumberFormatException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			} catch (TwitterException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
 			reply_str = "@" + CREATOR + " " + m.group(1).concat("をrt&favしました。");
 			StatusUpdate su = new StatusUpdate(reply_str);
 			su.setInReplyToStatusId(id);
@@ -555,7 +494,15 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("(\\d+).?rt|(\\d+).?リツイート",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			ta.rt(Long.parseLong(m.group(1)));
+			try {
+				ta.rt(Long.parseLong(m.group(1)));
+			} catch (NumberFormatException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			} catch (TwitterException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
 			reply_str = "@" + CREATOR + " " + m.group(1).concat("をRTしました。");
 			StatusUpdate su = new StatusUpdate(reply_str);
 			su.setInReplyToStatusId(id);
@@ -571,7 +518,15 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("(\\d+).?ふぁぼ|(\\d+).?fav");
 		m = p.matcher(str);
 		if (m.find()) {
-			ta.fav(Long.parseLong(m.group(1)));
+			try {
+				ta.fav(Long.parseLong(m.group(1)));
+			} catch (NumberFormatException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			} catch (TwitterException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
 			reply_str = "@" + CREATOR + " " + m.group(1).concat("をふぁぼりました。");
 			StatusUpdate su = new StatusUpdate(reply_str);
 			su.setInReplyToStatusId(id);
@@ -587,7 +542,15 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("(\\d+).?削除|(\\d+).?消して|(\\d+).?けして|(\\d+).?消去",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			delete(Long.parseLong(m.group(1)));
+			try {
+				delete(Long.parseLong(m.group(1)));
+			} catch (NumberFormatException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			} catch (TwitterException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
 			reply_str = "@" + CREATOR + " 了解しました。";
 			StatusUpdate su = new StatusUpdate(reply_str);
 			su.setInReplyToStatusId(id);
@@ -603,7 +566,12 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile(" 削除| 消して| けして| 消去",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			delete(mention.getInReplyToStatusId());
+			try {
+				delete(mention.getInReplyToStatusId());
+			} catch (TwitterException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
 			reply_str = "@" + CREATOR + " わかりました。";
 			StatusUpdate su = new StatusUpdate(reply_str);
 			su.setInReplyToStatusId(id);
@@ -630,52 +598,19 @@ public class TwitterResponse extends TwitterAction {
 			p = Pattern.compile("^@"+BOT_NAME+" ",Pattern.CASE_INSENSITIVE);
 			m = p.matcher(str);
 			str = m.replaceAll("");
-			tweet(str);
+			try {
+				tweet(str);
+			} catch (TwitterException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			}
 			return 30;
 		}
 
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?「",Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()){
-			p = Pattern.compile("」$",Pattern.CASE_INSENSITIVE);
-			m = p.matcher(str);
-			if (m.find()){
-				p = Pattern.compile("@"+BOT_NAME+" ",Pattern.CASE_INSENSITIVE);
-				m = p.matcher(str);
-				str = m.replaceAll("");
-				p = Pattern.compile("@" + CREATOR + " ",Pattern.CASE_INSENSITIVE);
-				m = p.matcher(str);
-				if (m.find()) str = m.replaceAll("");
-				p = Pattern.compile("@",Pattern.CASE_INSENSITIVE);
-				m = p.matcher(str);
-				if (m.find()) return 15;
-
-
-				int count = -1;
-				try {
-					count = Resister.resister_tweet(str);
-					reply_str = "@" + CREATOR + " 登録しました。 (" + count + ")";
-				} catch (ResisterException e1) {
-					// TODO 自動生成された catch ブロック
-					e1.printStackTrace();
-					reply_str = "@" + CREATOR + " 登録に失敗しました。(error 3)";
-				}
-				StatusUpdate su = new StatusUpdate(reply_str);
-				su.setInReplyToStatusId(id);
-				try {
-					twitter.updateStatus(su);
-				} catch (Exception e){
-					util.print_time();
-					e.printStackTrace();
-				}
-				return 10;
-			}
-		}
-
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?[ 　「].+」",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@"+BOT_NAME+"[ 　]?(登録(して)?)?([ 　]|「.+」)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?[ 　]",Pattern.CASE_INSENSITIVE);
+			p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?[ 　]?",Pattern.CASE_INSENSITIVE);
 			m = p.matcher(str);
 			int count = -1;
 			try {
@@ -744,12 +679,19 @@ public class TwitterResponse extends TwitterAction {
 	public static int tweet_call(int index) {
 		ArrayList<String> al = util.file_to_list(TWEET_FILE);
 		if (index < al.size()) {
-			tweet(util.replace_new_line(al.get(index)));
+			try {
+				tweet(util.replace_new_line(al.get(index)));
+			} catch (TwitterException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+				return -2;
+			}
 			try {
 				update_history(index);
 			} catch (IOException e) {
 				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
+				return -3;
 			}
 			return 1;
 		} else {

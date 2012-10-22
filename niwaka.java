@@ -36,7 +36,8 @@ public class niwaka {
 					System.exit(0);
 				}
 				if (args[0].equals("start") && args.length==1) {
-					Bot.bot();
+					Bot bot = new Bot();
+					bot.bot();
 					System.exit(0);
 				}
 				if (args[0].equals("reply") && args.length<3) {

@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import twitter4j.IDs;
+import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -38,12 +39,10 @@ public class TwitterAction extends Bot {
 		load_key();
 	}
 
-	public static void tweet(String message) {
+	public static void tweet(String message) throws TwitterException {
 		ConfigurationBuilder builder = new ConfigurationBuilder();
 		builder.setOAuthConsumerKey(CONSUMER_KEY);
 		builder.setOAuthConsumerSecret(CONSUMER_SECRET);
-
-		// Twitterのアプリケーション設定画面の値を入れる
 		builder.setOAuthAccessToken(ACCESS_TOKEN);
 		builder.setOAuthAccessTokenSecret(ACCESS_SECRET);
 
@@ -54,12 +53,27 @@ public class TwitterAction extends Bot {
 		try {
 			twitter.updateStatus(message);
 		} catch (TwitterException e) {
-			util.print_time();
-			e.printStackTrace();
+			throw e;
 		}
 	}
 
-	public int fav(long id) {
+	public static void tweet(StatusUpdate su) throws TwitterException {
+		ConfigurationBuilder builder = new ConfigurationBuilder();
+		builder.setOAuthConsumerKey(CONSUMER_KEY);
+		builder.setOAuthConsumerSecret(CONSUMER_SECRET);
+		builder.setOAuthAccessToken(ACCESS_TOKEN);
+		builder.setOAuthAccessTokenSecret(ACCESS_SECRET);
+		Configuration conf = builder.build();
+
+		Twitter twitter = new TwitterFactory(conf).getInstance();
+		try {
+			twitter.updateStatus(su);
+		} catch (TwitterException e) {
+			throw e;
+		}
+	}
+
+	public void fav(long id) throws TwitterException {
 		ConfigurationBuilder builder = new ConfigurationBuilder();
 		builder.setOAuthConsumerKey(CONSUMER_KEY);
 		builder.setOAuthConsumerSecret(CONSUMER_SECRET);
@@ -72,13 +86,12 @@ public class TwitterAction extends Bot {
 
 		try {
 			twitter.createFavorite(id);
-			return 1;
 		} catch (TwitterException e) {
-			return -1;
+			throw e;
 		}
 	}
 
-	public int rt(long id) {
+	public void rt(long id) throws TwitterException {
 		ConfigurationBuilder builder = new ConfigurationBuilder();
 		builder.setOAuthConsumerKey(CONSUMER_KEY);
 		builder.setOAuthConsumerSecret(CONSUMER_SECRET);
@@ -91,13 +104,12 @@ public class TwitterAction extends Bot {
 
 		try {
 			twitter.retweetStatus(id);
-			return 1;
 		} catch (TwitterException e) {
-			return -1;
+			throw e;
 		}
 	}
 
-	public static void delete(long id) {
+	public static void delete(long id) throws TwitterException {
 		ConfigurationBuilder builder = new ConfigurationBuilder();
 		builder.setOAuthConsumerKey(CONSUMER_KEY);
 		builder.setOAuthConsumerSecret(CONSUMER_SECRET);
@@ -109,7 +121,7 @@ public class TwitterAction extends Bot {
 		try {
 			twitter.destroyStatus(id);
 		} catch (TwitterException e) {
-			e.printStackTrace();
+			throw e;
 		}
 	}
 
@@ -210,7 +222,6 @@ public class TwitterAction extends Bot {
 			}
 			pw.close();
 
-			//System.out.println(rnd);
 			String s = list.get(rnd);
 			//改行を表す"\n"を文字列に含むツイートの仮の改行を、実際の改行文字と置換する。
 			s = util.replace_new_line(s);
@@ -229,13 +240,19 @@ public class TwitterAction extends Bot {
 		for(int i=1 ; i<length ; i++){
 			str += " " + args[i];	//シェルによって分けられた文を、プログラムにより結合
 		}
-		tweet(str);
+		try {
+			tweet(str);
+		} catch (TwitterException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
 	}
 
 	/**
 	 * ツイートするために必要な各種情報を読み込む
 	 */
 	public void load_key() {
+		Log.addLog("load key");
 		FileInputStream fis;
 		BufferedReader br = null;
 		String line = null;

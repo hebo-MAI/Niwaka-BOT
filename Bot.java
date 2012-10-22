@@ -12,7 +12,7 @@ public class Bot {
 	static TwitterResponse tr = new TwitterResponse();
 
 	// バックグラウンド実行用
-	public static void bot(){
+	public void bot(){
 		try {
 			//多重起動をチェックする
 			FileChannel fc = new FileOutputStream(new File("LockFile")).getChannel();
@@ -24,6 +24,9 @@ public class Bot {
 			}
 		} catch (Exception e) {
 		}
+		//多重起動でなければログシステムにログを追加
+		Log.addLog("Starting BOT");
+
 		Random rnd = new Random();
 		Calendar cal;
 		int hour,minute;
