@@ -671,7 +671,7 @@ public class TwitterResponse extends TwitterAction {
 			return 30;
 		}
 
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?(登録(して)?)?([ 　]|「.+」)",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?([ 　]|「.+」)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?[ 　]?",Pattern.CASE_INSENSITIVE);
