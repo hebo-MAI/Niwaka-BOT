@@ -25,7 +25,7 @@ public class Bot {
 		} catch (Exception e) {
 		}
 		//多重起動でなければログシステムにログを追加
-		Log.addLog("Starting BOT");
+		Log.info("Starting BOT");
 
 		Random rnd = new Random();
 		Calendar cal;

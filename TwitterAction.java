@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import twitter4j.IDs;
+import twitter4j.Status;
 import twitter4j.StatusUpdate;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -19,6 +20,13 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 
+/**
+ * Twitterに対して何らかの操作を行うクラス
+ *
+ * @author hebo-MAI
+ * @version 1.1
+ *
+ */
 public class TwitterAction extends Bot {
 
 	protected static String CONSUMER_KEY;
@@ -26,14 +34,13 @@ public class TwitterAction extends Bot {
 	protected static String ACCESS_TOKEN;
 	protected static String ACCESS_SECRET;
 
-	static final File TWEET_FILE = new File("tweet.txt");
+	protected static final File TWEET_FILE = new File("tweet.txt");
+	protected static final String PREVIEW_FILE = "preview.txt";
+	private static final String KEY_FILE = "key.txt";
 
-	public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+	public static final String LINE_SEPARATOR = util.LINE_SEPARATOR;
 
-	static final String CREATOR = "hebo_MAI";
-	static final String BOT_NAME = "niwaka_bot";
-
-	static final int N_PREVIEW = 11;
+	protected static final int N_PREVIEW = 11;
 
 	TwitterAction() {
 		load_key();
@@ -51,8 +58,10 @@ public class TwitterAction extends Bot {
 		Twitter twitter = new TwitterFactory(conf).getInstance();
 
 		try {
-			twitter.updateStatus(message);
+			Status s = twitter.updateStatus(message);
+			Log.info("tweeted " + s.getId());
 		} catch (TwitterException e) {
+			Log.warn("failed to tweet");
 			throw e;
 		}
 	}
@@ -67,8 +76,10 @@ public class TwitterAction extends Bot {
 
 		Twitter twitter = new TwitterFactory(conf).getInstance();
 		try {
-			twitter.updateStatus(su);
+			Status s = twitter.updateStatus(su);
+			Log.info("tweeted with status " + s.getId() + " for " + su.getInReplyToStatusId());
 		} catch (TwitterException e) {
+			Log.warn("failed to tweet with status for " + su.getInReplyToStatusId() + " : " + su.getStatus());
 			throw e;
 		}
 	}
@@ -86,7 +97,9 @@ public class TwitterAction extends Bot {
 
 		try {
 			twitter.createFavorite(id);
+			Log.info("created favorite " + id);
 		} catch (TwitterException e) {
+			Log.warn("failed to create favorite " + id);
 			throw e;
 		}
 	}
@@ -104,7 +117,9 @@ public class TwitterAction extends Bot {
 
 		try {
 			twitter.retweetStatus(id);
+			Log.info("retweeted " + id);
 		} catch (TwitterException e) {
+			Log.warn("failed to retweet " + id);
 			throw e;
 		}
 	}
@@ -120,7 +135,9 @@ public class TwitterAction extends Bot {
 		Twitter twitter = new TwitterFactory(conf).getInstance();
 		try {
 			twitter.destroyStatus(id);
+			Log.info("destroyed " + id);
 		} catch (TwitterException e) {
+			Log.warn("failed to destroy " + id);
 			throw e;
 		}
 	}
@@ -179,9 +196,10 @@ public class TwitterAction extends Bot {
 	public void tw() {
 		try {
 			//ツイート履歴の読込
-			File file = new File("preview.txt");
+			File file = new File(PREVIEW_FILE);
 			if (file.exists()==false){
-				System.err.println("\"preview.txt\" does not exist!");
+				System.err.println("\"" + PREVIEW_FILE + "\" does not exist!");
+				Log.error("\"" + PREVIEW_FILE + "\" does not exist!");
 				System.exit(1);
 			}
 			FileReader fr= new FileReader(file);
@@ -226,8 +244,10 @@ public class TwitterAction extends Bot {
 			//改行を表す"\n"を文字列に含むツイートの仮の改行を、実際の改行文字と置換する。
 			s = util.replace_new_line(s);
 			tweet(s);
+			Log.info("tweeted usual message");
 
 		} catch (Exception e) {
+			Log.warn("failed to tweet usual message");
 			util.print_time();
 			e.printStackTrace();
 		}
@@ -252,12 +272,11 @@ public class TwitterAction extends Bot {
 	 * ツイートするために必要な各種情報を読み込む
 	 */
 	public void load_key() {
-		Log.addLog("load key");
 		FileInputStream fis;
 		BufferedReader br = null;
 		String line = null;
 		try {
-			fis = new FileInputStream("key.txt");
+			fis = new FileInputStream(KEY_FILE);
 			br = new BufferedReader(new InputStreamReader(fis,"UTF-8"));
 		} catch (Exception e) {
 			util.print_time();
@@ -281,6 +300,7 @@ public class TwitterAction extends Bot {
 			e.printStackTrace();
 			System.exit(-1);
 		}
+		Log.info("loaded key and token");
 
 	}
 

@@ -20,11 +20,26 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 
+/**
+ * ツイートに対する反応を生成し、ツイートを行うクラス
+ *
+ * @author hebo-MAI
+ * @version 1.1
+ *
+ */
 public class TwitterResponse extends TwitterAction {
-	static String target_name = "[(ぴの)|(pino)|(ｐｉｎｏ)|(ピノ)][(くん)君]";
+
+	static final String CREATOR = "hebo_MAI";
+	static final String BOT_NAME = "niwaka_bot";
+
+	private final static String READLOG_FILE = "read_log.txt";
+	private final static String REPLYLOG_FILE = "reply_log.txt";
+
+	private final static String TARGET_NAME = "[(ぴの)|(pino)|(ｐｉｎｏ)|(ピノ)][(くん)君]";
+
+	private final static String NG_SOURCE = "twittbot\\.net";
 
 	public long responseTimeline() {
-		ResponseList<Status> userTimeline = null;
 		ConfigurationBuilder builder = new ConfigurationBuilder();
 		builder.setOAuthConsumerKey(CONSUMER_KEY);
 		builder.setOAuthConsumerSecret(CONSUMER_SECRET);
@@ -37,7 +52,7 @@ public class TwitterResponse extends TwitterAction {
 		long lastReadId = Long.MAX_VALUE;
 		//*
 		try {
-			in = new FileReader("read_log.txt");
+			in = new FileReader(READLOG_FILE);
 			BufferedReader br = new BufferedReader(in);
 			try {
 				lastReadId = Long.parseLong(br.readLine());
@@ -55,9 +70,10 @@ public class TwitterResponse extends TwitterAction {
 
 		Paging paging = new Paging (lastReadId);
 
+		ResponseList<Status> userTimeline = null;
 		try {
 			userTimeline = twitter.getHomeTimeline(paging);
-		} catch (Exception e) {
+		} catch (TwitterException e) {
 			util.print_time();
 			e.printStackTrace();
 		}
@@ -74,7 +90,7 @@ public class TwitterResponse extends TwitterAction {
 				tl_reply(utl);
 			}
 			if (id > lastReadId) {
-				File file = new File("read_log.txt");
+				File file = new File(READLOG_FILE);
 				try {
 					PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 					pw.println(id);
@@ -92,7 +108,7 @@ public class TwitterResponse extends TwitterAction {
 		FileReader in;
 		long lastReadId = Long.MAX_VALUE;
 		try {
-			in = new FileReader("read_log.txt");
+			in = new FileReader(READLOG_FILE);
 			BufferedReader br = new BufferedReader(in);
 			try {
 				lastReadId = Long.parseLong(br.readLine());
@@ -117,8 +133,8 @@ public class TwitterResponse extends TwitterAction {
 		m = p.matcher(str);
 		if (m.find())	return 1;
 
-		//twittbot.netを含むソースからのツイートに対しては反応しない
-		p = Pattern.compile("twittbot\\.net", Pattern.CASE_INSENSITIVE);
+		//NG_SOURCEから投稿されたツイートに対しては反応しない
+		p = Pattern.compile(NG_SOURCE, Pattern.CASE_INSENSITIVE);
 		m = p.matcher(status.getSource());
 		if (m.find())	return 2;
 
@@ -161,7 +177,7 @@ public class TwitterResponse extends TwitterAction {
 			return 15;
 		}
 
-		p = Pattern.compile(target_name + ".*にわか",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile(TARGET_NAME + ".*にわか" , Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			long id = status.getId();
@@ -179,7 +195,7 @@ public class TwitterResponse extends TwitterAction {
 			}
 			return 13;
 		}
-		p = Pattern.compile("にわか.*" + target_name ,Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("にわか.*" + TARGET_NAME , Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			long id = status.getId();
@@ -215,7 +231,7 @@ public class TwitterResponse extends TwitterAction {
 
 		FileReader in;
 		try {
-			in = new FileReader("reply_log.txt");
+			in = new FileReader(REPLYLOG_FILE);
 			BufferedReader br = new BufferedReader(in);
 			try {
 				lastPostId = Long.parseLong(br.readLine()) + 1;
@@ -232,7 +248,7 @@ public class TwitterResponse extends TwitterAction {
 		ResponseList<Status> mentions = null;
 		try {
 			mentions = twitter.getMentions();
-		} catch (Exception e) {
+		} catch (TwitterException e) {
 			util.print_time();
 			e.printStackTrace();
 		}
@@ -249,7 +265,7 @@ public class TwitterResponse extends TwitterAction {
 					if (id<mention.getId()) id = mention.getId();
 				}
 				if (id != lastPostId) {
-					File file = new File("reply_log.txt");
+					File file = new File(REPLYLOG_FILE);
 					try {
 						PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 						pw.println(id);
@@ -276,7 +292,7 @@ public class TwitterResponse extends TwitterAction {
 
 		try {
 			mentions = twitter.getMentions();
-		} catch (Exception e) {
+		} catch (TwitterException e) {
 			util.print_time();
 			e.printStackTrace();
 		}
@@ -315,7 +331,7 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("@"+BOT_NAME+"[ 　]?(「.+」$|登録(して)?([ 　]?「)?)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
-			p = Pattern.compile("@"+BOT_NAME+"[ 　]?(登録(して)?)?[ 　]?",Pattern.CASE_INSENSITIVE);
+			p = Pattern.compile("@"+BOT_NAME+"[ 　]",Pattern.CASE_INSENSITIVE);
 			m = p.matcher(str);
 			int count = -1;
 			try {
@@ -330,28 +346,32 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
 			return 100;
 		}
 
-		p = Pattern.compile("^.+@"+BOT_NAME+"|^@"+BOT_NAME+".?$",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("^@"+BOT_NAME+"[ 　]?(つぶや|ツイート)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			if (Math.random()<0.5)	reply_str = name + " 呼んだ？";
-			else					reply_str = name + " ねえ、呼んだ？";
-			StatusUpdate su = new StatusUpdate(reply_str);
-			su.setInReplyToStatusId(id);
-			try {
-				twitter.updateStatus(su);
-			} catch (Exception e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return 10;
+			ta.tw();
+			return 20;
 		}
+
+		p = Pattern.compile("^@"+BOT_NAME+"[ 　]?(うるさい|黙れ)",Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
+			try {
+				delete(mention.getInReplyToStatusId());
+			} catch (TwitterException e1) {
+				// TODO 自動生成された catch ブロック
+				e1.printStackTrace();
+			}
+			return 200;
+		}
+
 		p = Pattern.compile("^@"+BOT_NAME+"[ 　]?呼んでない",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
@@ -360,7 +380,7 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
@@ -374,13 +394,13 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
 			return 12;
 		}
-		p = Pattern.compile("#ぴのくんはにわか",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("[#＃]ぴのくんはにわか",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			reply_str = name + "おいやめろ";
@@ -388,14 +408,14 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
 			return 8;
 		}
 
-		p = Pattern.compile("にわか",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("にわか.+",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			if (Math.random()<0.5)	reply_str = name + " 俺にわかじゃないよ。";
@@ -404,12 +424,28 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
 			return 1;
 		}
+
+		p = Pattern.compile("にわか$",Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
+			reply_str = name + " おい";
+			StatusUpdate su = new StatusUpdate(reply_str);
+			su.setInReplyToStatusId(id);
+			try {
+				twitter.updateStatus(su);
+			} catch (TwitterException e){
+				util.print_time();
+				e.printStackTrace();
+			}
+			return 2;
+		}
+
 
 		p = Pattern.compile("@"+BOT_NAME+"[ 　]?([0-9０１２３４５６７８９]+)番",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
@@ -421,6 +457,34 @@ public class TwitterResponse extends TwitterAction {
 			return 3;
 		}
 
+		p = Pattern.compile("^(.*)?@"+BOT_NAME+".?$",Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
+			if (Math.random()<0.5)	reply_str = name + " 呼んだ？";
+			else					reply_str = name + " ねえ、呼んだ？";
+			StatusUpdate su = new StatusUpdate(reply_str);
+			su.setInReplyToStatusId(id);
+			try {
+				twitter.updateStatus(su);
+			} catch (TwitterException e){
+				util.print_time();
+				e.printStackTrace();
+			}
+			return 10;
+		}
+
+		// 上記全ての条件に当てはまらなかった場合
+		{
+			reply_str = name + " ?__?";
+			StatusUpdate su = new StatusUpdate(reply_str);
+			su.setInReplyToStatusId(id);
+			try {
+				twitter.updateStatus(su);
+			} catch (TwitterException e) {
+				util.print_time();
+				e.printStackTrace();
+			}
+		}
 
 
 		return -1;
@@ -459,7 +523,7 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
@@ -484,14 +548,14 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
 			return 2;
 		}
 
-		p = Pattern.compile("(\\d+).?rt|(\\d+).?リツイート",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("(\\d+).?(rt|リツイート)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			try {
@@ -508,14 +572,14 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
 			return 3;
 		}
 
-		p = Pattern.compile("(\\d+).?ふぁぼ|(\\d+).?fav");
+		p = Pattern.compile("(\\d+).?(ふぁぼ|fav)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			try {
@@ -532,14 +596,14 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
 			return 4;
 		}
 
-		p = Pattern.compile("(\\d+).?削除|(\\d+).?消して|(\\d+).?けして|(\\d+).?消去",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("(\\d+).?(削除|消して|けして|消去)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			try {
@@ -556,14 +620,14 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
 			return 5;
 		}
 
-		p = Pattern.compile(" 削除| 消して| けして| 消去",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("[ 　](削除|消して|けして|消去)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			try {
@@ -577,7 +641,7 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
@@ -625,7 +689,7 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
@@ -640,11 +704,25 @@ public class TwitterResponse extends TwitterAction {
 			su.setInReplyToStatusId(id);
 			try {
 				twitter.updateStatus(su);
-			} catch (Exception e){
+			} catch (TwitterException e){
 				util.print_time();
 				e.printStackTrace();
 			}
 			System.exit(100);
+		}
+
+		p = Pattern.compile("爆発しろ",Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
+			reply_str = "どっかーん！";
+			StatusUpdate su = new StatusUpdate(reply_str);
+			try {
+				twitter.updateStatus(su);
+			} catch (TwitterException e){
+				util.print_time();
+				e.printStackTrace();
+			}
+			System.exit(110);
 		}
 
 		p = Pattern.compile("@"+BOT_NAME+"[ 　]?([0-9０１２３４５６７８９]+)番",Pattern.CASE_INSENSITIVE);
@@ -657,16 +735,22 @@ public class TwitterResponse extends TwitterAction {
 			return 15;
 		}
 
-		if (reply_str == null) reply_str = "@" + CREATOR + " ?__?";
-		StatusUpdate su = new StatusUpdate(reply_str);
-		su.setInReplyToStatusId(id);
-		//System.out.println(reply_str);
-		try {
-			twitter.updateStatus(su);
-		} catch (Exception e) {
-			util.print_time();
-			e.printStackTrace();
+		// 上記の条件全てに当てはまらなかった場合
+		// 通常のリプライのチェックを通す
+		if(doReply(mention) < 0) {
+			// それでもリプライが生成されなかった場合
+			if (reply_str == null) reply_str = "@" + CREATOR + " ?__?";
+			StatusUpdate su = new StatusUpdate(reply_str);
+			su.setInReplyToStatusId(id);
+			try {
+				twitter.updateStatus(su);
+			} catch (TwitterException e) {
+				util.print_time();
+				e.printStackTrace();
+			}
+			//*/
 		}
+
 
 		return -1;
 
@@ -705,7 +789,7 @@ public class TwitterResponse extends TwitterAction {
 	 * @throws IOException 入出力のエラー
 	 */
 	public static void update_history(int index) throws IOException {
-		File file = new File("preview.txt");
+		File file = new File(PREVIEW_FILE);
 		ArrayList<String> al = util.file_to_list(file);
 		PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 		pw.println(index);
