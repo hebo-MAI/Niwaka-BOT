@@ -20,4 +20,3 @@ fi
 #java -cp twitter4j-core-2.2.1.jar:twitter4j-stream-2.2.1.jar:. niwaka
 java -cp Niwaka_BOT.jar niwaka
 exit 0
-
