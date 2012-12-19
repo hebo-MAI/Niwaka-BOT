@@ -42,7 +42,7 @@ public class Bot {
 				} catch(Exception e) {
 				}
 				//if (i%5 == 0) {
-					tr.reply();
+					tr.makeReply();
 					tr.responseTimeline();
 				//}
 			}

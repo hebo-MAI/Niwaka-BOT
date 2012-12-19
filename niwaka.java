@@ -42,8 +42,8 @@ public class niwaka {
 				}
 				if (args[0].equals("reply") && args.length<3) {
 					TwitterResponse tr = new TwitterResponse();
-					if (args.length==2) tr.reply(Long.parseLong(args[1]));		//引数のIDに対してリプライを行う
-					else tr.reply();											//リプライを行なっていないツイートに対してリプライを行う
+					if (args.length==2) tr.checkReply(Long.parseLong(args[1]));		//引数のIDに対してリプライを行う
+					else tr.makeReply();											//リプライを行なっていないツイートに対してリプライを行う
 					System.exit(0);
 				}
 				if (args[0].equals("response") && args.length==1) {

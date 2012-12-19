@@ -2,8 +2,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,15 +28,9 @@ public class util {
 	}
 
 	public static String get_time() {
-		Calendar c = Calendar.getInstance();
-
-		int month = c.get(Calendar.MONTH) + 1;
-		int day = c.get(Calendar.DATE);
-		int hour = c.get(Calendar.HOUR_OF_DAY);
-		int minute = c.get(Calendar.MINUTE);
-		int second = c.get(Calendar.SECOND);
-
-		return "[" + month + "/" + day + " " + hour + ":" + minute + ":" + second + "] ";
+		Date d = new Date();
+		DateFormat df = new SimpleDateFormat("[MM/dd HH:mm:ss]");
+		return df.format(d);
 	}
 
 
@@ -53,6 +49,21 @@ public class util {
 		}
 		return sb.toString();
 	}
+
+	/**
+	 * 正規表現regexが文字列targetに含まれるかどうか
+	 * @param target : 正規表現の対象となる文字列
+	 * @param regex : 正規表現の文字列
+	 * @return 含まれるならtrue , それ以外ならfalse
+	 */
+	public static boolean isMatched(String target, String regex) {
+		Pattern p;
+		Matcher m;
+		p = Pattern.compile(regex , Pattern.CASE_INSENSITIVE);
+		m = p.matcher(target);
+		return m.find();
+	}
+
 
 	/**
 	 * 文字列が入っていない要素をリストから取り除く

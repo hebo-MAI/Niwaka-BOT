@@ -66,6 +66,18 @@ public class TwitterAction extends Bot {
 		}
 	}
 
+	/**
+	 * ツイートidに対してreplyの文字列で返信を行う
+	 * @param reply : 返信する文字列
+	 * @param id : 返信先のツイートのid
+	 * @throws TwitterException
+	 */
+	public static void reply(String reply, long id) throws TwitterException {
+		StatusUpdate su = new StatusUpdate(reply);
+		su.setInReplyToStatusId(id);
+		tweet(su);
+	}
+
 	public static void tweet(StatusUpdate su) throws TwitterException {
 		ConfigurationBuilder builder = new ConfigurationBuilder();
 		builder.setOAuthConsumerKey(CONSUMER_KEY);

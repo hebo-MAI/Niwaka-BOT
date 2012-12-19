@@ -16,20 +16,20 @@ import java.io.OutputStreamWriter;
 public class Log {
 	static final File LOG_FILE = new File("log.txt");
 	static final String LINE_SEPARATOR = util.LINE_SEPARATOR;
-	static boolean generate_log = false;
+	static boolean generate_log = true;
 
 	public static void warn(String str) {
 		addLog("WARN : " + str);
 	}
-	
+
 	public static void error(String str) {
 		addLog("ERROR : " + str);
 	}
-	
+
 	public static void info(String str) {
 		addLog("INFO : " + str);
 	}
-	
+
 	/**
 	 * ログファイルの末尾に入力文字列を追加した後、改行する。
 	 * @param str : 入力文字列
