@@ -108,13 +108,10 @@ public class TwitterResponse extends TwitterAction {
 				tl_reply(utl);
 			}
 			if (id > lastReadId) {
-				File file = new File(READLOG_FILE);
 				try {
-					PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-					pw.println(id);
-					pw.close();
-				} catch (Exception e) {
-					util.print_time();
+					update_readlog(id);
+				} catch (IOException e) {
+					// TODO 自動生成された catch ブロック
 					e.printStackTrace();
 				}
 			}
@@ -674,6 +671,12 @@ public class TwitterResponse extends TwitterAction {
 				util.print_time();
 				e.printStackTrace();
 			}
+			try {
+				update_readlog(mention.getId());
+			} catch (IOException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			}
 			System.exit(100);
 		}
 
@@ -685,6 +688,12 @@ public class TwitterResponse extends TwitterAction {
 				tweet(reply_str);
 			} catch (TwitterException e){
 				util.print_time();
+				e.printStackTrace();
+			}
+			try {
+				update_readlog(mention.getId());
+			} catch (IOException e) {
+				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
 			}
 			System.exit(110);
@@ -760,6 +769,18 @@ public class TwitterResponse extends TwitterAction {
 		for(int i=0;i<N_PREVIEW-1;i++){
 			pw.println(al.get(i));
 		}
+		pw.close();
+	}
+
+	/**
+	 * 既読のツイートのIDを保存するファイルを更新する
+	 * @param id : 既読のツイートのID
+	 * @throws IOException 入出力のエラー
+	 */
+	public static void update_readlog(long id) throws IOException {
+		File file = new File(READLOG_FILE);
+		PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+		pw.println(id);
 		pw.close();
 	}
 
