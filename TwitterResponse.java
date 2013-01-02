@@ -672,7 +672,7 @@ public class TwitterResponse extends TwitterAction {
 				e.printStackTrace();
 			}
 			try {
-				update_readlog(mention.getId());
+				update_readlog(id);
 			} catch (IOException e) {
 				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
@@ -691,7 +691,7 @@ public class TwitterResponse extends TwitterAction {
 				e.printStackTrace();
 			}
 			try {
-				update_readlog(mention.getId());
+				update_readlog(id);
 			} catch (IOException e) {
 				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
