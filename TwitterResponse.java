@@ -31,19 +31,6 @@ import twitter4j.conf.ConfigurationBuilder;
  *
  */
 
-enum TimelineResponse {
-	WarnNoNewMessage,
-	WarnIncludingOwnID,
-	WarnReplyingButIncludingBotName,
-	WarnReplyingWordButIncludingBotName,
-	WarnPostedFromNGSource,
-	WarnUndefined,
-	WarnUnknown,
-	IncludingHashTag,
-	IncludingBotName,
-	ReplyingBotWithWordAstern,
-	ReplyingBotWithWordForward
-};
 
 public class TwitterResponse extends TwitterAction {
 
@@ -56,6 +43,28 @@ public class TwitterResponse extends TwitterAction {
 	private final static String TARGET_NAME = "[(ぴの)|(pino)|(ｐｉｎｏ)|(ピノ)][(くん)君]";
 
 	private final static String NG_SOURCE = "twittbot\\.net";
+
+	// タイムラインに対する反応のタイプ
+	public enum TimelineResponse {
+		WarnNoNewMessage,
+		WarnIncludingOwnID,
+		WarnReplyingButIncludingBotName,
+		WarnReplyingWordButIncludingBotName,
+		WarnPostedFromNGSource,
+		WarnUndefined,
+		WarnUnknown,
+		IncludingHashTag,
+		IncludingBotName,
+		ReplyingBotWithWordAstern,
+		ReplyingBotWithWordForward
+	};
+
+	public enum ReplyResponse {
+		IncludingBotName,
+		ResisteredSuccessfully,
+
+	};
+
 
 	public long responseTimeline() {
 		ConfigurationBuilder builder = new ConfigurationBuilder();
@@ -332,13 +341,10 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("@"+BOT_NAME+"[ 　]?(「.+」$|登録(して)?([ 　]?「)?)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
-			//p = Pattern.compile("@"+BOT_NAME+"[ 　]",Pattern.CASE_INSENSITIVE);
-			//m = p.matcher(str);
-			p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?[ 　]?",Pattern.CASE_INSENSITIVE);
-			m = p.matcher(str);
+			str = str.replaceAll("@"+BOT_NAME+"[ 　]?(登録(して)?[ 　]?)?","");
 			int count = -1;
 			try {
-				count = Resister.resister_tweet(m.replaceAll(""));
+				count = Resister.resister_tweet(str);
 				reply_str = name + " 登録しました。 (" + count + ")";
 			} catch (ResisterException e1) {
 				// TODO 自動生成された catch ブロック
