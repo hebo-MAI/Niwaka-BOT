@@ -44,6 +44,10 @@ public class TwitterResponse extends TwitterAction {
 
 	private final static String NG_SOURCE = "twittbot\\.net";
 
+
+	private final static String SPACE = "([ 　]+)?";
+	private final static String BOT_SPACE = BOT_NAME + SPACE;
+
 	// タイムラインに対する反応のタイプ
 	public enum TimelineResponse {
 		WarnNoNewMessage,
@@ -338,10 +342,10 @@ public class TwitterResponse extends TwitterAction {
 		Pattern p;
 		Matcher m;
 
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?(「.+」$|登録(して)?([ 　]?「)?)",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@" + BOT_SPACE + "([\\(（].+[\\)）])?" + SPACE + "(「.+」$|登録(して)?(" + SPACE + "「)?)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
-			str = str.replaceAll("@"+BOT_NAME+"[ 　]?(登録(して)?[ 　]?)?","");
+			str = str.replaceAll("@" + BOT_SPACE + "(登録(して)?" + SPACE + ")?","");
 			int count = -1;
 			try {
 				count = Resister.resister_tweet(str);
@@ -360,14 +364,14 @@ public class TwitterResponse extends TwitterAction {
 			return 100;
 		}
 
-		p = Pattern.compile("^@"+BOT_NAME+"[ 　]?(つぶや|ツイート)",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("^@" + BOT_SPACE + "(つぶや|ツイート)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			ta.tw();
 			return 20;
 		}
 
-		p = Pattern.compile("^@"+BOT_NAME+"[ 　]?(うるさい|黙れ)",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("^@" + BOT_SPACE + "(うるさい|黙れ)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			try {
@@ -379,7 +383,7 @@ public class TwitterResponse extends TwitterAction {
 			return 200;
 		}
 
-		p = Pattern.compile("^@"+BOT_NAME+"[ 　]?呼んでない",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("^@" + BOT_SPACE + "呼んでない",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			reply_str = name + " あ、そう。";
@@ -391,7 +395,7 @@ public class TwitterResponse extends TwitterAction {
 			}
 			return 11;
 		}
-		p = Pattern.compile("^@"+BOT_NAME+"[ 　]?気のせい",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("^@" + BOT_SPACE + "気のせい",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			reply_str = name + "気のせいか・・・";
@@ -444,7 +448,7 @@ public class TwitterResponse extends TwitterAction {
 		}
 
 
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?([0-9０１２３４５６７８９]+)番",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@" + BOT_SPACE + "([0-9０１２３４５６７８９]+)番",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			String s = m.group(1);	//最初にマッチした正規表現を置き換える
@@ -454,7 +458,7 @@ public class TwitterResponse extends TwitterAction {
 			return 3;
 		}
 
-		p = Pattern.compile("^(.*)?@"+BOT_NAME+".?$",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("^(.*)?@" + BOT_SPACE + ".?$",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			if (Math.random()<0.5)	reply_str = name + " 呼んだ？";
@@ -602,7 +606,7 @@ public class TwitterResponse extends TwitterAction {
 			return 5;
 		}
 
-		p = Pattern.compile("[ 　](削除|消して|けして|消去)",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile(SPACE + "(削除|消して|けして|消去)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			try {
@@ -644,29 +648,6 @@ public class TwitterResponse extends TwitterAction {
 			return 30;
 		}
 
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?([ 　]|「.+」)",Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()) {
-			p = Pattern.compile("@"+BOT_NAME+"[ 　]?登録(して)?[ 　]?",Pattern.CASE_INSENSITIVE);
-			m = p.matcher(str);
-			int count = -1;
-			try {
-				count = Resister.resister_tweet(m.replaceAll(""));
-				reply_str = "@" + CREATOR + " 登録しました。 (" + count + ")";
-			} catch (ResisterException e1) {
-				// TODO 自動生成された catch ブロック
-				e1.printStackTrace();
-				reply_str = "@" + CREATOR + " 登録に失敗しました。(error 4)";
-			}
-			try {
-				reply(reply_str, id);
-			} catch (TwitterException e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return 11;
-		}
-
 		p = Pattern.compile("強制終了",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
@@ -705,15 +686,6 @@ public class TwitterResponse extends TwitterAction {
 			System.exit(110);
 		}
 
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?([0-9０１２３４５６７８９]+)番",Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()) {
-			String s = m.group(1);	//最初にマッチした正規表現を置き換える
-			s = util.zenkakuNumToHankaku(s);
-			int index = Integer.parseInt(s);
-			tweet_call(index);
-			return 15;
-		}
 
 		// 上記の条件全てに当てはまらなかった場合
 		// 通常のリプライのチェックを通す
