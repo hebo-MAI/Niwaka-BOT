@@ -41,9 +41,7 @@ public class Resister {
 		}
 
 		//改行文字をすべて"\n"に置き換え、意図しない改行を防ぐ
-		p = Pattern.compile(LINE_SEPARATOR);
-		m = p.matcher(str);
-		if (m.find()) m.replaceAll("\n");
+		str = str.replaceAll(LINE_SEPARATOR, "\\\\n");
 
 		//ツイートをリストに登録する
 		BufferedWriter bw = null;
@@ -113,7 +111,7 @@ public class Resister {
 
 		//Log.info("Resistering the response : " + str1);
 		//Log.info("Resistering the message : " + str2);
-		
+
 		//反応をリストに登録する
 		BufferedWriter bw = null;
 		try {
