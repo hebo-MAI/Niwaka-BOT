@@ -5,15 +5,14 @@ Niwaka-BOT
 
 [必要なもの]
   Java本体と、Twitter4Jの対応したバージョンのライブラリが必要です。
-  開発にはTwitter4J 2.2.5を使っていますが、他のバージョンでも動くと思います。
+  開発にはTwitter4J 3.0.3を使っていますが、他のバージョンでも動くと思います。
   Twitterへの投稿は、必要な情報が書かれているkey.txtが存在しないと出来ません。
   ツイート一覧からのツイートを行うには、tweet.txtが必要です。
   
 
 [導入]
   CONSUMER KEY, CONSUMER SECRET KEY, ACCESS TOKEN, ACCESS TOKEN SECRETの4つを、key.txtに書き込みます。
-  compile.shとniwaka.sh、niwaka.javaをkey.txtのあるディレクトリに置きます。
-  次に、compile.shを実行します。
+  後は適当に起動するだけです。
 
 [使い方]
   niwaka.shに適当な引数をつけて実行すればBOTが動きます。
