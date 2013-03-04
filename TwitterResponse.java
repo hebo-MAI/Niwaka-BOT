@@ -47,6 +47,7 @@ public class TwitterResponse extends TwitterAction {
 
 	private final static String SPACE = "([ 　]+)?";
 	private final static String BOT_SPACE = BOT_NAME + SPACE;
+	private final static String NUMSTR = "([0-9０１２３４５６７８９]+)";
 
 	// タイムラインに対する反応のタイプ
 	public enum TimelineResponse {
@@ -267,7 +268,7 @@ public class TwitterResponse extends TwitterAction {
 
 		ResponseList<Status> mentions = null;
 		try {
-			mentions = twitter.getMentions();
+			mentions = twitter.getMentionsTimeline();
 		} catch (TwitterException e) {
 			util.print_time();
 			e.printStackTrace();
@@ -312,7 +313,7 @@ public class TwitterResponse extends TwitterAction {
 		ResponseList<Status> mentions = null;
 
 		try {
-			mentions = twitter.getMentions();
+			mentions = twitter.getMentionsTimeline();
 		} catch (TwitterException e) {
 			util.print_time();
 			e.printStackTrace();
@@ -448,10 +449,10 @@ public class TwitterResponse extends TwitterAction {
 		}
 
 
-		p = Pattern.compile("@" + BOT_SPACE + "([0-9０１２３４５６７８９]+)番",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@" + BOT_SPACE + NUMSTR + "番",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			String s = m.group(1);	//最初にマッチした正規表現を置き換える
+			String s = str.replaceAll(NUMSTR, "");	//最初にマッチした正規表現を置き換える
 			s = util.zenkakuNumToHankaku(s);
 			int index = Integer.parseInt(s);
 			tweet_call(index);
