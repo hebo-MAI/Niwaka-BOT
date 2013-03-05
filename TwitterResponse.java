@@ -321,7 +321,7 @@ public class TwitterResponse extends TwitterAction {
 
 		if (mentions != null) {
 			for (Status mention : mentions) {
-				if (id == mention.getId() && mention.isRetweet() != true ) {
+				if (id == mention.getId() && mention.isRetweet() == false ) {
 					if (mention.getUser().getScreenName().equals(CREATOR)) {
 						doReplyForCreator(mention);
 					} else {
@@ -452,7 +452,7 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("@" + BOT_SPACE + NUMSTR + "番",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			String s = str.replaceAll(NUMSTR, "");	//最初にマッチした正規表現を置き換える
+			String s = str.replaceAll(NUMSTR, "");	//マッチした正規表現を全て置き換える
 			s = util.zenkakuNumToHankaku(s);
 			int index = Integer.parseInt(s);
 			tweet_call(index);

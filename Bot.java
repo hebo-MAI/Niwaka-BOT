@@ -27,24 +27,23 @@ public class Bot {
 		//多重起動でなければログシステムにログを追加
 		Log.info("Starting BOT");
 
+
+		// インスタンスを呼び出し、自動で非同期処理を行う
+		@SuppressWarnings("unused")
+		TimeLineStream tls = new TimeLineStream();
+
 		Random rnd = new Random();
 		Calendar cal;
 		int hour,minute;
 		int random_time;
 		while (true){
-			random_time = 15;
-			for(int i=0;i<3;i++){
-				random_time += rnd.nextInt(10);
-			}
+			random_time = 15 + util.dice(10, 3);
 			for(int i=0;i<random_time;i++){
 				try {
-				Thread.sleep(50000+rnd.nextInt(5000));
+					Thread.sleep(60000+rnd.nextInt(5000));
 				} catch(Exception e) {
 				}
-				//if (i%5 == 0) {
-					tr.makeReply();
-					tr.responseTimeline();
-				//}
+				tr.makeReply();
 			}
 			cal = Calendar.getInstance();
 			hour = cal.get(Calendar.HOUR_OF_DAY);

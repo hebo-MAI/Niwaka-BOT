@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +32,21 @@ public class util {
 		Date d = new Date();
 		DateFormat df = new SimpleDateFormat("[MM/dd HH:mm:ss]");
 		return df.format(d);
+	}
+
+	/**
+	 * n面ダイスをm回振った時の和を求める
+	 * @param n : ダイスの面数(0からn-1までのn面のダイス)
+	 * @param m : ダイスを振る回数
+	 * @return : ダイスの出た目の和
+	 */
+	public static int dice(int n, int m){
+		int val = 0;
+		Random rnd = new Random();
+		for(int i=0; i<m; i++){
+			val += rnd.nextInt(n);
+		}
+		return val;
 	}
 
 
