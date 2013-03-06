@@ -30,7 +30,7 @@ public class Bot {
 
 		// インスタンスを呼び出し、自動で非同期処理を行う
 		@SuppressWarnings("unused")
-		TimeLineStream tls = new TimeLineStream();
+		UserTimelineStream uts = new UserTimelineStream();
 
 		Random rnd = new Random();
 		Calendar cal;
