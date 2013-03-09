@@ -281,7 +281,7 @@ public class TwitterResponse extends TwitterAction {
 					if (mention.getUser().getScreenName().equals(CREATOR)) {
 						doReplyForCreator(mention);
 					} else {
-						doReply(mention);
+						doReplyOnReply(mention);
 					}
 					if (id<mention.getId()) id = mention.getId();
 				}
@@ -325,20 +325,68 @@ public class TwitterResponse extends TwitterAction {
 					if (mention.getUser().getScreenName().equals(CREATOR)) {
 						doReplyForCreator(mention);
 					} else {
-						doReply(mention);
+						doReplyOnReply(mention);
 					}
 				}
 			}
 		}
 	}
 
-	public static int doReply(Status mention) {
-
+	public static int doReplyOnTimeline(Status mention) {
 		String str = mention.getText();
 		long id = mention.getId();
 		String name = "@" + mention.getUser().getScreenName();
-		//自分自身にはリプライしない
-		if (name.equals("@"+BOT_NAME)) return 100;
+		String reply_str = null;
+		Pattern p;
+		Matcher m;
+
+		p = Pattern.compile("[#＃]ぴのくんはにわか",Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
+			reply_str = name + " おいやめろ";
+			try {
+				reply(reply_str, id);
+			} catch (TwitterException e){
+				util.print_time();
+				e.printStackTrace();
+			}
+			return 8;
+		}
+
+		p = Pattern.compile("にわか.+",Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
+			if (Math.random()<0.5)	reply_str = name + " 俺にわかじゃないよ。";
+			else					reply_str = name + " だからにわかじゃないって。";
+			try {
+				reply(reply_str, id);
+			} catch (TwitterException e){
+				util.print_time();
+				e.printStackTrace();
+			}
+			return 1;
+		}
+
+		p = Pattern.compile("にわか$",Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
+			reply_str = name + " おい";
+			try {
+				reply(reply_str, id);
+			} catch (TwitterException e){
+				util.print_time();
+				e.printStackTrace();
+			}
+			return 2;
+		}
+
+		return -1;
+	}
+
+	public static int doReplyOnReply(Status mention) {
+		String str = mention.getText();
+		long id = mention.getId();
+		String name = "@" + mention.getUser().getScreenName();
 		String reply_str = null;
 		Pattern p;
 		Matcher m;
@@ -396,6 +444,7 @@ public class TwitterResponse extends TwitterAction {
 			}
 			return 11;
 		}
+
 		p = Pattern.compile("^@" + BOT_SPACE + "気のせい",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
@@ -408,46 +457,6 @@ public class TwitterResponse extends TwitterAction {
 			}
 			return 12;
 		}
-		p = Pattern.compile("[#＃]ぴのくんはにわか",Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()) {
-			reply_str = name + "おいやめろ";
-			try {
-				reply(reply_str, id);
-			} catch (TwitterException e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return 8;
-		}
-
-		p = Pattern.compile("にわか.+",Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()) {
-			if (Math.random()<0.5)	reply_str = name + " 俺にわかじゃないよ。";
-			else					reply_str = name + " だからにわかじゃないって。";
-			try {
-				reply(reply_str, id);
-			} catch (TwitterException e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return 1;
-		}
-
-		p = Pattern.compile("にわか$",Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()) {
-			reply_str = name + " おい";
-			try {
-				reply(reply_str, id);
-			} catch (TwitterException e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return 2;
-		}
-
 
 		p = Pattern.compile("@" + BOT_SPACE + NUMSTR + "番",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
@@ -473,8 +482,10 @@ public class TwitterResponse extends TwitterAction {
 			return 10;
 		}
 
-		// 上記全ての条件に当てはまらなかった場合
-		{
+		// 上記全ての条件に当てはまらず、なおかつBOT宛のリプライである場合
+		p = Pattern.compile(BOT_NAME , Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
 			reply_str = name + " ?__?";
 			try {
 				reply(reply_str, id);
@@ -482,8 +493,26 @@ public class TwitterResponse extends TwitterAction {
 				util.print_time();
 				e.printStackTrace();
 			}
+			return 1;
 		}
 
+
+		return -1;
+	}
+
+	public static int doReply(Status mention) {
+		// 自分自身のツイートにはリプライしない
+		if (BOT_NAME.equals(mention.getUser().getScreenName())) return 1000;
+
+		Pattern p;
+		Matcher m;
+
+		// ここでは、BOT名を含むツイート以外に反応する
+		p = Pattern.compile("@" + BOT_NAME , Pattern.CASE_INSENSITIVE);
+		m = p.matcher(mention.getText());
+		if (m.find() == false) {
+			doReplyOnTimeline(mention);
+		}
 
 		return -1;
 	}
@@ -690,7 +719,7 @@ public class TwitterResponse extends TwitterAction {
 
 		// 上記の条件全てに当てはまらなかった場合
 		// 通常のリプライのチェックを通す
-		if(doReply(mention) < 0) {
+		if(doReplyOnReply(mention) < 0) {
 			// それでもリプライが生成されなかった場合
 			if (reply_str == null) reply_str = "@" + CREATOR + " ?__?";
 			try {
