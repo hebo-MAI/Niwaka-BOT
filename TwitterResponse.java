@@ -109,17 +109,12 @@ public class TwitterResponse extends TwitterAction {
 			util.print_time();
 			e.printStackTrace();
 		}
-		/*
-		for(int i=0; i<userTimeline.size(); i++)
-		System.out.println(userTimeline.get(i).getText());
-		System.exit(500);
-		//*/
 
 		long id = 0;
 		if (userTimeline != null) {
 			for (Status utl : userTimeline) {
 				if (id < utl.getId())	id = utl.getId();
-				tl_reply(utl);
+				doReplyOnTimeline(utl);
 			}
 			if (id > lastReadId) {
 				try {
@@ -133,109 +128,6 @@ public class TwitterResponse extends TwitterAction {
 		return id;
 	}
 
-	public static TimelineResponse tl_reply(Status status) {
-		FileReader in;
-		long lastReadId = Long.MAX_VALUE;
-		try {
-			in = new FileReader(READLOG_FILE);
-			BufferedReader br = new BufferedReader(in);
-			try {
-				lastReadId = Long.parseLong(br.readLine());
-			} catch (Exception e) {
-				util.print_time();
-				e.printStackTrace();
-			} finally {
-				in.close();
-			}
-		} catch (Exception e){
-			util.print_time();
-			e.printStackTrace();
-		}
-		if (status.getId()<=lastReadId) return TimelineResponse.WarnNoNewMessage;
-
-		String str = status.getText();
-		Pattern p;
-		Matcher m;
-
-		// 自身の名前を含むツイートを除外する
-		p = Pattern.compile("@"+BOT_NAME, Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find())	return TimelineResponse.WarnIncludingOwnID;
-
-		//NG_SOURCEから投稿されたツイートに対しては反応しない
-		p = Pattern.compile(NG_SOURCE, Pattern.CASE_INSENSITIVE);
-		m = p.matcher(status.getSource());
-		if (m.find())	return TimelineResponse.WarnPostedFromNGSource;
-
-		p = Pattern.compile("[#|＃]ぴのくんはにわか",Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()) {
-			long id = status.getId();
-			String name = status.getUser().getScreenName();
-			if (name.equals(BOT_NAME)) return TimelineResponse.WarnReplyingButIncludingBotName;
-			String reply = null;
-			if (Math.random()<0.5)	reply = "@" + name + " おいそのハッシュタグ使うのやめろ";
-			else					reply = "@" + name + " だからやめろ";
-			try {
-				reply(reply, id);
-				Thread.sleep(5000);
-			} catch (Exception e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return TimelineResponse.IncludingHashTag;
-		}
-		p = Pattern.compile("bot.*にわか|にわか.+bot",Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()) {
-			long id = status.getId();
-			String name = status.getUser().getScreenName();
-			if (name.equals(BOT_NAME)) return TimelineResponse.WarnReplyingButIncludingBotName;
-			String reply = "@" + name + " すいません";
-			try {
-				reply(reply, id);
-				Thread.sleep(5000);
-			} catch (Exception e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return TimelineResponse.IncludingBotName;
-		}
-
-		p = Pattern.compile(TARGET_NAME + ".*にわか" , Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()) {
-			long id = status.getId();
-			String name = status.getUser().getScreenName();
-			if (name.equals(BOT_NAME)) return TimelineResponse.WarnReplyingButIncludingBotName;
-			String reply = "@" + name + " 俺にわかじゃないよ";
-			try {
-				reply(reply, id);
-				Thread.sleep(5000);
-			} catch (Exception e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return TimelineResponse.ReplyingBotWithWordAstern;
-		}
-		p = Pattern.compile("にわか.*" + TARGET_NAME , Pattern.CASE_INSENSITIVE);
-		m = p.matcher(str);
-		if (m.find()) {
-			long id = status.getId();
-			String name = status.getUser().getScreenName();
-			if (name.equals(BOT_NAME)) return TimelineResponse.WarnReplyingButIncludingBotName;
-			String reply = "@" + name + " にわかじゃないよ!";
-			try {
-				reply(reply, id);
-				Thread.sleep(5000);
-			} catch (Exception e){
-				util.print_time();
-				e.printStackTrace();
-			}
-			return TimelineResponse.ReplyingBotWithWordForward;
-		}
-		return TimelineResponse.WarnUndefined;
-	}
 
 	public void makeReply() {
 		long lastPostId = Long.MAX_VALUE;
@@ -332,55 +224,81 @@ public class TwitterResponse extends TwitterAction {
 		}
 	}
 
-	public static int doReplyOnTimeline(Status mention) {
+	public static TimelineResponse doReplyOnTimeline(Status mention) {
 		String str = mention.getText();
 		long id = mention.getId();
 		String name = "@" + mention.getUser().getScreenName();
-		String reply_str = null;
+		String reply = null;
 		Pattern p;
 		Matcher m;
 
-		p = Pattern.compile("[#＃]ぴのくんはにわか",Pattern.CASE_INSENSITIVE);
+		// 自身の名前を含むツイートを除外する
+		p = Pattern.compile("@"+BOT_NAME, Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find())	return TimelineResponse.WarnIncludingOwnID;
+
+		//NG_SOURCEから投稿されたツイートに対しては反応しない
+		p = Pattern.compile(NG_SOURCE, Pattern.CASE_INSENSITIVE);
+		m = p.matcher(mention.getSource());
+		if (m.find())	return TimelineResponse.WarnPostedFromNGSource;
+
+		p = Pattern.compile("[#|＃]ぴのくんはにわか",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			reply_str = name + " おいやめろ";
+			if (Math.random()<0.5)	reply = "@" + name + " おいそのハッシュタグ使うのやめろ";
+			else					reply = "@" + name + " だからやめろ";
 			try {
-				reply(reply_str, id);
-			} catch (TwitterException e){
+				reply(reply, id);
+				Thread.sleep(5000);
+			} catch (Exception e){
 				util.print_time();
 				e.printStackTrace();
 			}
-			return 8;
+			return TimelineResponse.IncludingHashTag;
 		}
-
-		p = Pattern.compile("にわか.+",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("bot.*にわか|にわか.+bot",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			if (Math.random()<0.5)	reply_str = name + " 俺にわかじゃないよ。";
-			else					reply_str = name + " だからにわかじゃないって。";
+			reply = "@" + name + " すいません";
 			try {
-				reply(reply_str, id);
-			} catch (TwitterException e){
+				reply(reply, id);
+				Thread.sleep(5000);
+			} catch (Exception e){
 				util.print_time();
 				e.printStackTrace();
 			}
-			return 1;
+			return TimelineResponse.IncludingBotName;
 		}
 
-		p = Pattern.compile("にわか$",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile(TARGET_NAME + ".*にわか" , Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			reply_str = name + " おい";
+			reply = "@" + name + " 俺にわかじゃないよ";
 			try {
-				reply(reply_str, id);
-			} catch (TwitterException e){
+				reply(reply, id);
+				Thread.sleep(5000);
+			} catch (Exception e){
 				util.print_time();
 				e.printStackTrace();
 			}
-			return 2;
+			return TimelineResponse.ReplyingBotWithWordAstern;
+		}
+		p = Pattern.compile("にわか.*" + TARGET_NAME , Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
+			reply = "@" + name + " にわかじゃないよ!";
+			try {
+				reply(reply, id);
+				Thread.sleep(5000);
+			} catch (Exception e){
+				util.print_time();
+				e.printStackTrace();
+			}
+			return TimelineResponse.ReplyingBotWithWordForward;
 		}
 
-		return -1;
+
+		return TimelineResponse.WarnUndefined;
 	}
 
 	public static int doReplyOnReply(Status mention) {
@@ -480,6 +398,33 @@ public class TwitterResponse extends TwitterAction {
 				e.printStackTrace();
 			}
 			return 10;
+		}
+
+		p = Pattern.compile("にわか.+",Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
+			if (Math.random()<0.5)	reply_str = name + " 俺にわかじゃないよ。";
+			else					reply_str = name + " だからにわかじゃないって。";
+			try {
+				reply(reply_str, id);
+			} catch (TwitterException e){
+				util.print_time();
+				e.printStackTrace();
+			}
+			return 1;
+		}
+
+		p = Pattern.compile("にわか$",Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find()) {
+			reply_str = name + " おい";
+			try {
+				reply(reply_str, id);
+			} catch (TwitterException e){
+				util.print_time();
+				e.printStackTrace();
+			}
+			return 2;
 		}
 
 		// 上記全ての条件に当てはまらず、なおかつBOT宛のリプライである場合
