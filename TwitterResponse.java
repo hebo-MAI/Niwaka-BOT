@@ -40,7 +40,7 @@ public class TwitterResponse extends TwitterAction {
 	private final static String READLOG_FILE = "read_log.txt";
 	private final static String REPLYLOG_FILE = "reply_log.txt";
 
-	private final static String TARGET_NAME = "[(ぴの)|(pino)|(ｐｉｎｏ)|(ピノ)][(くん)君]";
+	private final static String TARGET_NAME = "[(ぴの)|(pino)|(ｐｉｎｏ)|(ピノ)][(くん)君]?";
 
 	private final static String NG_SOURCE = "twittbot\\.net";
 
@@ -245,8 +245,8 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("[#|＃]ぴのくんはにわか",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			if (Math.random()<0.5)	reply = "@" + name + " おいそのハッシュタグ使うのやめろ";
-			else					reply = "@" + name + " だからやめろ";
+			if (Math.random()<0.5)	reply = name + " おいそのハッシュタグ使うのやめろ";
+			else					reply = name + " だからやめろ";
 			try {
 				reply(reply, id);
 				Thread.sleep(5000);
@@ -259,7 +259,7 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("bot.*にわか|にわか.+bot",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			reply = "@" + name + " すいません";
+			reply = name + " すいません";
 			try {
 				reply(reply, id);
 				Thread.sleep(5000);
@@ -273,7 +273,7 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile(TARGET_NAME + ".*にわか" , Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			reply = "@" + name + " 俺にわかじゃないよ";
+			reply = name + " 俺にわかじゃないよ";
 			try {
 				reply(reply, id);
 				Thread.sleep(5000);
@@ -286,7 +286,7 @@ public class TwitterResponse extends TwitterAction {
 		p = Pattern.compile("にわか.*" + TARGET_NAME , Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			reply = "@" + name + " にわかじゃないよ!";
+			reply = name + " にわかじゃないよ!";
 			try {
 				reply(reply, id);
 				Thread.sleep(5000);
@@ -308,6 +308,13 @@ public class TwitterResponse extends TwitterAction {
 		String reply_str = null;
 		Pattern p;
 		Matcher m;
+
+		// BOTに対するリプライでなかった場合はリプライを行わない
+		p = Pattern.compile("@" + BOT_NAME , Pattern.CASE_INSENSITIVE);
+		m = p.matcher(str);
+		if (m.find() == false) {
+			return -1;
+		}
 
 		p = Pattern.compile("@" + BOT_SPACE + "([\\(（].+[\\)）])?" + SPACE + "(「.+」$|登録(して)?(" + SPACE + "「)?)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
@@ -623,10 +630,10 @@ public class TwitterResponse extends TwitterAction {
 			return 30;
 		}
 
-		p = Pattern.compile("強制終了",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("(強制)?終了(して)?[。.！!]?$",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
-			reply_str = "@" + CREATOR +  " 強制終了します。";
+			reply_str = "@" + CREATOR +  " 終了します。";
 			try {
 				reply(reply_str, id);
 			} catch (TwitterException e){
