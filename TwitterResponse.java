@@ -40,7 +40,7 @@ public class TwitterResponse extends TwitterAction {
 	private final static String READLOG_FILE = "read_log.txt";
 	private final static String REPLYLOG_FILE = "reply_log.txt";
 
-	private final static String TARGET_NAME = "[(ぴの)|(pino)|(ｐｉｎｏ)|(ピノ)][(くん)君]?";
+	private final static String TARGET_NAME = "(ぴの|pino|ｐｉｎｏ|ピノ)((くん)|君)?";
 
 	private final static String NG_SOURCE = "twittbot\\.net";
 
