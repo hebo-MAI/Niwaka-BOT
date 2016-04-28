@@ -216,7 +216,6 @@ public class TwitterResponse extends TwitterAction {
 		return -1;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void reply() {
 		long lastPostId = Long.MAX_VALUE;
 		ConfigurationBuilder builder = new ConfigurationBuilder();
@@ -249,7 +248,7 @@ public class TwitterResponse extends TwitterAction {
 
 		ResponseList<Status> mentions = null;
 		try {
-			mentions = twitter.getMentions();
+			mentions = twitter.getMentionsTimeline();
 		} catch (TwitterException e) {
 			util.print_time();
 			e.printStackTrace();
@@ -280,7 +279,7 @@ public class TwitterResponse extends TwitterAction {
 			}
 		}
 	}
-	@SuppressWarnings("deprecation")
+
 	public void reply(long id) {
 		ConfigurationBuilder builder = new ConfigurationBuilder();
 		builder.setOAuthConsumerKey(CONSUMER_KEY);
@@ -294,7 +293,7 @@ public class TwitterResponse extends TwitterAction {
 		ResponseList<Status> mentions = null;
 
 		try {
-			mentions = twitter.getMentions();
+			mentions = twitter.getMentionsTimeline();
 		} catch (TwitterException e) {
 			util.print_time();
 			e.printStackTrace();
