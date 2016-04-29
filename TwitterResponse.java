@@ -36,6 +36,7 @@ public class TwitterResponse extends TwitterAction {
 	private final static String REPLYLOG_FILE = "reply_log.txt";
 
 	private final static String TARGET_NAME = "[(ぴの)|(pino)|(ｐｉｎｏ)|(ピノ)][(くん)君]";
+	private final static String DECIMAL_NUMBER = "[0-9０１２３４５６７８９]+";
 
 	private final static String NG_SOURCE = "twittbot\\.net";
 
@@ -280,6 +281,10 @@ public class TwitterResponse extends TwitterAction {
 		}
 	}
 
+	/**
+	 * IDのツイートに対してリプライをする
+	 * @param id リプライを送る先のツイートのID
+	 */
 	public void reply(long id) {
 		ConfigurationBuilder builder = new ConfigurationBuilder();
 		builder.setOAuthConsumerKey(CONSUMER_KEY);
@@ -449,7 +454,7 @@ public class TwitterResponse extends TwitterAction {
 		}
 
 
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?([0-9０１２３４５６７８９]+)番",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@"+BOT_NAME+"[ 　]?(" + DECIMAL_NUMBER + ")番",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			String s = m.group(1);	//最初にマッチした正規表現を置き換える
@@ -507,7 +512,7 @@ public class TwitterResponse extends TwitterAction {
 		Pattern p;
 		Matcher m;
 
-		p = Pattern.compile("(\\d+).?fav.rt",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("("+DECIMAL_NUMBER+").?fav.rt",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
 			try {
@@ -532,7 +537,7 @@ public class TwitterResponse extends TwitterAction {
 			return 1;
 		}
 
-		p = Pattern.compile("(\\d+).?rt.fav",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("("+DECIMAL_NUMBER+").?rt.fav",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()){
 			try {
@@ -557,7 +562,7 @@ public class TwitterResponse extends TwitterAction {
 			return 2;
 		}
 
-		p = Pattern.compile("(\\d+).?(rt|リツイート)",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("("+DECIMAL_NUMBER+").?(rt|リツイート)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			try {
@@ -581,7 +586,7 @@ public class TwitterResponse extends TwitterAction {
 			return 3;
 		}
 
-		p = Pattern.compile("(\\d+).?(ふぁぼ|fav)",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("("+DECIMAL_NUMBER+").?(ふぁぼ|fav)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			try {
@@ -605,7 +610,7 @@ public class TwitterResponse extends TwitterAction {
 			return 4;
 		}
 
-		p = Pattern.compile("(\\d+).?(削除|消して|けして|消去)",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("("+DECIMAL_NUMBER+").?(削除|消して|けして|消去)",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			try {
@@ -727,7 +732,7 @@ public class TwitterResponse extends TwitterAction {
 			System.exit(110);
 		}
 
-		p = Pattern.compile("@"+BOT_NAME+"[ 　]?([0-9０１２３４５６７８９]+)番",Pattern.CASE_INSENSITIVE);
+		p = Pattern.compile("@"+BOT_NAME+"[ 　]?(" + DECIMAL_NUMBER + ")番",Pattern.CASE_INSENSITIVE);
 		m = p.matcher(str);
 		if (m.find()) {
 			String s = m.group(1);	//最初にマッチした正規表現を置き換える
